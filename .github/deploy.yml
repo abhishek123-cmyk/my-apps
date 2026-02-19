@@ -1,4 +1,4 @@
-name: CI-CD Pipeline
+name: CI-CD Deployment
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/cicd-demo .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-apps .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/cicd-demo
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-apps
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker stop cicd-demo || true
-            docker rm cicd-demo || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/cicd-demo
-            docker run -d -p 3000:3000 --name cicd-demo ${{ secrets.DOCKER_USERNAME }}/cicd-demo
+            docker stop my-app || true
+            docker rm my-app || true
+            docker pull ${{ secrets.DOCKER_USERNAME }}/my-apps
+            docker run -d -p 3000:3000 --name my-app ${{ secrets.DOCKER_USERNAME }}/my-apps
